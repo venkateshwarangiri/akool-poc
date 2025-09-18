@@ -1,0 +1,220 @@
+/* Left side panel */
+.left-side {
+  flex: 0 0 420px;
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: fit-content;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+}
+
+.left-side h3 {
+  margin: 0 0 16px 0;
+  color: #1a1a1a;
+  font-size: 24px;
+  font-weight: 600;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 12px;
+}
+
+/* Form controls */
+.left-side label {
+  display: block;
+  margin-bottom: 8px;
+  color: #666;
+  font-weight: 500;
+}
+
+.left-side input,
+.left-side select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s;
+  background: #f8f9fa;
+}
+
+.left-side input:focus,
+.left-side select:focus {
+  outline: none;
+  border-color: #4096ff;
+  box-shadow: 0 0 0 2px rgba(64, 150, 255, 0.1);
+}
+
+.left-side input:disabled,
+.left-side select:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
+/* Buttons */
+.buttons {
+  margin-top: 8px;
+}
+
+.button-on,
+.button-off {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.button-on {
+  background: #4096ff;
+  color: white;
+}
+
+.button-on:hover {
+  background: #1677ff;
+}
+
+.button-off {
+  background: #ff4d4f;
+  color: white;
+}
+
+.button-off:hover {
+  background: #f5222d;
+}
+
+.icon-button {
+  padding: 5px;
+  cursor: pointer;
+}
+
+.icon-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.avatar-select option.available {
+  color: green;
+}
+
+.avatar-select option.unavailable {
+  color: red;
+}
+
+/* JSON Preview styles */
+.json-preview-container {
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.json-preview-container.clickable:hover .json-preview {
+  border-color: #4096ff;
+  background: #f0f7ff;
+}
+
+.json-preview-container.clickable:hover .json-preview-hint {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.json-preview-container.disabled {
+  cursor: not-allowed;
+}
+
+.json-preview-container.disabled .json-preview {
+  opacity: 0.6;
+}
+
+.json-preview {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #f8f9fa;
+  overflow: hidden;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.json-preview-content {
+  margin: 0;
+  padding: 12px 16px;
+  padding-bottom: 32px; /* Space for hint */
+  font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #666;
+  background: transparent;
+  white-space: pre-wrap;
+  overflow-x: auto;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.json-preview-hint {
+  position: absolute;
+  bottom: 8px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: rgba(64, 150, 255, 0.1);
+  color: #4096ff;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 4px;
+  opacity: 0.7;
+  transform: translateY(2px);
+  transition: all 0.2s;
+  pointer-events: none;
+}
+
+.json-preview-hint svg {
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+/* Configuration Groups */
+.config-group {
+  background: #fafbfc;
+  border: 1px solid #f0f2f5;
+  border-radius: 10px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.group-header {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.config-group > div:not(.buttons) {
+  margin-bottom: 0;
+}
+
+.config-group .buttons {
+  margin-top: 4px;
+}

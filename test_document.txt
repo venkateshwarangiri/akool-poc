@@ -1,0 +1,1 @@
+This is a test PDF content for RAG system testing. It contains information about climate change and environmental protection. The document discusses various topics including carbon emissions, renewable energy, and sustainable development practices.
