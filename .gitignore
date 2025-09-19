@@ -128,3 +128,6 @@ package-lock.json
 .DS_Store
 deploy.sh
 
+# Local configuration files with secrets
+src/config/azureConfig.local.ts
+

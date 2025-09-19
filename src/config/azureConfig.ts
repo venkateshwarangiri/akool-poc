@@ -21,13 +21,24 @@ export function getConfigValue(envVar: string, fallback: string): string {
   return import.meta.env[envVar] || fallback;
 }
 
+// Try to import local config if it exists
+let LOCAL_CONFIG: any = null;
+try {
+  LOCAL_CONFIG = require('./azureConfig.local').AZURE_CONFIG_LOCAL;
+} catch (e) {
+  // Local config doesn't exist, use default
+}
+
 // Get Azure OpenAI configuration
 export function getAzureConfig() {
+  // Use local config if available, otherwise use environment variables or default config
+  const config = LOCAL_CONFIG || AZURE_CONFIG;
+  
   return {
-    apiKey: getConfigValue('VITE_AZURE_OPENAI_KEY', AZURE_CONFIG.apiKey),
-    endpoint: getConfigValue('VITE_AZURE_OPENAI_ENDPOINT', AZURE_CONFIG.endpoint),
-    gpt4oDeployment: getConfigValue('VITE_AZURE_GPT4O_DEPLOYMENT', AZURE_CONFIG.gpt4oDeployment),
-    embeddingDeployment: getConfigValue('VITE_AZURE_EMBEDDING_DEPLOYMENT', AZURE_CONFIG.embeddingDeployment),
-    apiVersion: getConfigValue('VITE_AZURE_API_VERSION', AZURE_CONFIG.apiVersion)
+    apiKey: getConfigValue('VITE_AZURE_OPENAI_KEY', config.apiKey),
+    endpoint: getConfigValue('VITE_AZURE_OPENAI_ENDPOINT', config.endpoint),
+    gpt4oDeployment: getConfigValue('VITE_AZURE_GPT4O_DEPLOYMENT', config.gpt4oDeployment),
+    embeddingDeployment: getConfigValue('VITE_AZURE_EMBEDDING_DEPLOYMENT', config.embeddingDeployment),
+    apiVersion: getConfigValue('VITE_AZURE_API_VERSION', config.apiVersion)
   };
 }
