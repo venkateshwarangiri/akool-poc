@@ -1,0 +1,2 @@
+literal:https://nlh-open-ai.openai.azure.com/
+literal:https://your-resource.openai.azure.com/
