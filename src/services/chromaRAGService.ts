@@ -627,7 +627,15 @@ export class ChromaRAGService {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ input: text }),
+          body: JSON.stringify({ 
+            input: text,
+            azure: {
+              apiKey: import.meta.env.VITE_AZURE_OPENAI_KEY,
+              endpoint: import.meta.env.VITE_AZURE_OPENAI_ENDPOINT,
+              apiVersion: import.meta.env.VITE_AZURE_API_VERSION,
+              deployment: import.meta.env.VITE_AZURE_EMBEDDING_DEPLOYMENT
+            }
+          }),
         });
         if (!response.ok) {
           throw new Error(`Embedding API proxy error: ${response.status}`);

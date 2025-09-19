@@ -1,17 +1,29 @@
 module.exports = async function (context, req) {
   try {
-    const apiKey = process.env.AZURE_OPENAI_KEY;
-    const endpoint = process.env.AZURE_OPENAI_ENDPOINT;
-    const apiVersion = process.env.AZURE_API_VERSION || '2024-05-01-preview';
-    const deployment = process.env.AZURE_EMBEDDING_DEPLOYMENT || 'text-embedding-3-large';
+    const body = req.body || {};
+    const override = (body && body.azure) || {};
 
-    if (!apiKey || !endpoint) {
-      context.res = { status: 500, body: { error: 'Server configuration missing' } };
+    const apiKey = override.apiKey || process.env.AZURE_OPENAI_KEY;
+    const endpoint = override.endpoint || process.env.AZURE_OPENAI_ENDPOINT;
+    const apiVersion = override.apiVersion || process.env.AZURE_API_VERSION || '2024-05-01-preview';
+    const deployment = override.deployment || process.env.AZURE_EMBEDDING_DEPLOYMENT || 'text-embedding-3-large';
+    const fullUrlEmbeddings = override.fullUrlEmbeddings;
+
+    if (!apiKey) {
+      context.res = { status: 400, body: { error: 'Missing Azure OpenAI apiKey' } };
       return;
     }
 
-    const base = endpoint.endsWith('/') ? endpoint.slice(0, -1) : endpoint;
-    const url = `${base}/openai/deployments/${deployment}/embeddings?api-version=${apiVersion}`;
+    let url;
+    if (fullUrlEmbeddings && typeof fullUrlEmbeddings === 'string') {
+      url = fullUrlEmbeddings;
+    } else if (endpoint) {
+      const base = endpoint.endsWith('/') ? endpoint.slice(0, -1) : endpoint;
+      url = `${base}/openai/deployments/${deployment}/embeddings?api-version=${apiVersion}`;
+    } else {
+      context.res = { status: 400, body: { error: 'Missing Azure OpenAI endpoint' } };
+      return;
+    }
 
     const response = await fetch(url, {
       method: 'POST',
@@ -19,7 +31,7 @@ module.exports = async function (context, req) {
         'Content-Type': 'application/json',
         'api-key': apiKey,
       },
-      body: JSON.stringify(req.body || {}),
+      body: JSON.stringify(body),
     });
 
     const text = await response.text();
