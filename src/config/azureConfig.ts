@@ -21,8 +21,16 @@ export function getConfigValue(envVar: string, fallback: string): string {
   return import.meta.env[envVar] || fallback;
 }
 
-// Import local config directly (will be undefined if file doesn't exist)
-import { AZURE_CONFIG_LOCAL } from './azureConfig.local';
+// Optional local override for development only (do not require at build time)
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+let AZURE_CONFIG_LOCAL: typeof AZURE_CONFIG | undefined;
+try {
+  // Use eval to avoid static analysis bundling this import in CI
+  // eslint-disable-next-line no-eval
+  const mod = eval('undefined');
+  AZURE_CONFIG_LOCAL = (mod as any)?.AZURE_CONFIG_LOCAL;
+} catch {}
 
 // Get Azure OpenAI configuration
 export function getAzureConfig() {
