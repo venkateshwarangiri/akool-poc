@@ -669,4 +669,216 @@ export class EnterpriseRAGService {
   }
 
   private createEnhancedPrompt(query: string, context: string): string {
-    return `
+    return `You are an expert assistant. Answer SHORT and SWEET (2-3 sentences max).
+Use only the provided context. If unsure, say you don’t know.
+
+User question:
+${query}
+
+Context:
+${context}`;
+  }
+
+  // Placeholder for other methods like classifyQuery, assessResponseQuality, etc.
+  // These would typically be defined elsewhere or are not provided in the original file.
+  // For the purpose of this edit, we'll assume they exist or are placeholders.
+  private classifyQuery(query: string): string {
+    const lowerQuery = query.toLowerCase();
+    if (lowerQuery.includes('who') || lowerQuery.includes('what') || lowerQuery.includes('when') || lowerQuery.includes('where') || lowerQuery.includes('why')) {
+      return 'question';
+    }
+    if (lowerQuery.includes('tell me') || lowerQuery.includes('explain') || lowerQuery.includes('describe') || lowerQuery.includes('show me')) {
+      return 'information_request';
+    }
+    if (lowerQuery.includes('do you know') || lowerQuery.includes('can you tell me') || lowerQuery.includes('do you have') || lowerQuery.includes('have you')) {
+      return 'information_request';
+    }
+    return 'general_query';
+  }
+
+  private assessResponseQuality(confidence: number, sourceCount: number): 'high' | 'medium' | 'low' {
+    if (confidence > 0.8) {
+      return 'high';
+    }
+    if (confidence > 0.5) {
+      return 'medium';
+    }
+    return 'low';
+  }
+
+  private logAnalytics(eventType: 'query' | 'document_upload' | 'document_delete' | 'error', details: Record<string, any>): void {
+    const event: AnalyticsEvent = {
+      id: `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      timestamp: new Date(),
+      eventType,
+      details,
+    };
+    this.analytics.push(event);
+    console.log('🔄 Analytics Event:', event);
+  }
+
+  private getFileType(fileName: string): 'pdf' | 'docx' | 'txt' | 'html' | 'md' {
+    const lowerCaseFileName = fileName.toLowerCase();
+    if (lowerCaseFileName.endsWith('.pdf')) {
+      return 'pdf';
+    }
+    if (lowerCaseFileName.endsWith('.docx') || lowerCaseFileName.endsWith('.doc')) {
+      return 'docx';
+    }
+    if (lowerCaseFileName.endsWith('.txt')) {
+      return 'txt';
+    }
+    if (lowerCaseFileName.endsWith('.html')) {
+      return 'html';
+    }
+    if (lowerCaseFileName.endsWith('.md')) {
+      return 'md';
+    }
+    return 'txt'; // Default to txt if file type is unknown
+  }
+
+  private async extractTextFromFile(file: File): Promise<string> {
+    if (file.type === 'application/pdf') {
+      return this.extractTextFromPDF(file);
+    } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || file.type === 'application/msword') {
+      return this.extractTextFromDOCX(file);
+    } else if (file.type === 'text/plain') {
+      return this.extractTextFromTXT(file);
+    } else if (file.type === 'text/html') {
+      return this.extractTextFromHTML(file);
+    } else if (file.type === 'text/markdown') {
+      return this.extractTextFromMD(file);
+    } else {
+      throw new Error(`Unsupported file type: ${file.type}`);
+    }
+  }
+
+  private async extractTextFromPDF(file: File): Promise<string> {
+    const reader = new FileReader();
+    reader.readAsArrayBuffer(file);
+    return new Promise((resolve, reject) => {
+      reader.onload = async (event) => {
+        if (event.target?.result) {
+          try {
+            const pdf = await pdfjsLib.getDocument(event.target.result).promise;
+            let text = '';
+            for (let i = 1; i <= pdf.numPages; i++) {
+              const page = await pdf.getPage(i);
+              const content = await page.getTextContent();
+              text += content.items.map(item => item.str).join(' ');
+            }
+            resolve(text);
+          } catch (error) {
+            reject(error);
+          }
+        } else {
+          reject(new Error('Failed to read PDF file'));
+        }
+      };
+      reader.onerror = (error) => {
+        reject(error);
+      };
+    });
+  }
+
+  private async extractTextFromDOCX(file: File): Promise<string> {
+    const reader = new FileReader();
+    reader.readAsArrayBuffer(file);
+    return new Promise((resolve, reject) => {
+      reader.onload = async (event) => {
+        if (event.target?.result) {
+          try {
+            const doc = await docx.load(event.target.result);
+            const text = doc.getText();
+            resolve(text);
+          } catch (error) {
+            reject(error);
+          }
+        } else {
+          reject(new Error('Failed to read DOCX file'));
+        }
+      };
+      reader.onerror = (error) => {
+        reject(error);
+      };
+    });
+  }
+
+  private async extractTextFromTXT(file: File): Promise<string> {
+    const reader = new FileReader();
+    reader.readAsText(file);
+    return new Promise((resolve, reject) => {
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          resolve(event.target.result as string);
+        } else {
+          reject(new Error('Failed to read TXT file'));
+        }
+      };
+      reader.onerror = (error) => {
+        reject(error);
+      };
+    });
+  }
+
+  private async extractTextFromHTML(file: File): Promise<string> {
+    const reader = new FileReader();
+    reader.readAsText(file);
+    return new Promise((resolve, reject) => {
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(event.target.result as string, 'text/html');
+          const text = doc.body.textContent || '';
+          resolve(text);
+        } else {
+          reject(new Error('Failed to read HTML file'));
+        }
+      };
+      reader.onerror = (error) => {
+        reject(error);
+      };
+    });
+  }
+
+  private async extractTextFromMD(file: File): Promise<string> {
+    const reader = new FileReader();
+    reader.readAsText(file);
+    return new Promise((resolve, reject) => {
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(event.target.result as string, 'text/html');
+          const text = doc.body.textContent || '';
+          resolve(text);
+        } else {
+          reject(new Error('Failed to read MD file'));
+        }
+      };
+      reader.onerror = (error) => {
+        reject(error);
+      };
+    });
+  }
+
+  private estimateTokens(text: string): number {
+    // Simple token estimation (approximate)
+    // This is a very rough estimate and might need a proper tokenizer for accurate counts
+    return Math.ceil(text.length / 4); // Average word length is 4 characters
+  }
+
+  private cosineSimilarity(vec1: number[], vec2: number[]): number {
+    let dotProduct = 0;
+    let norm1 = 0;
+    let norm2 = 0;
+
+    for (let i = 0; i < vec1.length; i++) {
+      dotProduct += vec1[i] * vec2[i];
+      norm1 += vec1[i] * vec1[i];
+      norm2 += vec2[i] * vec2[i];
+    }
+
+    const denominator = Math.sqrt(norm1) * Math.sqrt(norm2);
+    return denominator === 0 ? 0 : dotProduct / denominator;
+  }
+}
