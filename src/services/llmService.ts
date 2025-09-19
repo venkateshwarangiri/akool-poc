@@ -169,7 +169,14 @@ export class LLMService {
         requestBody: requestBody
       });
 
-      const response = await fetch(this.config.endpoint, {
+      // Ensure endpoint is treated as absolute URL
+      const endpoint = this.config.endpoint.startsWith('http') 
+        ? this.config.endpoint 
+        : `https://${this.config.endpoint}`;
+        
+      console.log('🔧 Making request to:', endpoint);
+        
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers,
         body: JSON.stringify(requestBody),
