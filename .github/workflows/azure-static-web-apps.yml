@@ -33,6 +33,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Debug environment variables
+        run: |
+          echo "Checking GitHub Secrets availability:"
+          echo "VITE_AZURE_OPENAI_KEY: ${{ secrets.VITE_AZURE_OPENAI_KEY != '' && 'SET' || 'NOT SET' }}"
+          echo "VITE_AZURE_OPENAI_ENDPOINT: ${{ secrets.VITE_AZURE_OPENAI_ENDPOINT != '' && 'SET' || 'NOT SET' }}"
+          echo "VITE_AZURE_GPT4O_DEPLOYMENT: ${{ secrets.VITE_AZURE_GPT4O_DEPLOYMENT != '' && 'SET' || 'NOT SET' }}"
+          echo "VITE_AZURE_EMBEDDING_DEPLOYMENT: ${{ secrets.VITE_AZURE_EMBEDDING_DEPLOYMENT != '' && 'SET' || 'NOT SET' }}"
+          echo "VITE_AZURE_API_VERSION: ${{ secrets.VITE_AZURE_API_VERSION != '' && 'SET' || 'NOT SET' }}"
+
       - name: Build project
         run: pnpm build
         env:
