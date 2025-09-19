@@ -10,6 +10,7 @@ import AdminPanel from './components/AdminPanel';
 import LLMConfigPanel from './components/LLMConfigPanel';
 // import AzureOpenAIConfig from './components/AzureOpenAIConfig';
 import EnterpriseDocumentManager from './components/EnterpriseDocumentManager';
+import ConfigStatus from './components/ConfigStatus';
 import { useAgora } from './contexts/AgoraContext';
 import { useAudioControls } from './hooks/useAudioControls';
 import { useStreaming } from './hooks/useStreaming';
@@ -119,6 +120,7 @@ function App() {
 
   return (
     <>
+      <ConfigStatus />
       <div className="app-header">
         <div className="nav-buttons">
           <button 

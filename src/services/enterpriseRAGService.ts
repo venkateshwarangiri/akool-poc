@@ -293,8 +293,8 @@ export class EnterpriseRAGService {
 
     try {
       // Check if we have Azure OpenAI configuration (same as ChromaRAGService)
-      const azureKey = import.meta.env.VITE_AZURE_OPENAI_KEY || '***REMOVED***';
-      const azureEndpoint = import.meta.env.VITE_AZURE_OPENAI_ENDPOINT || '***REMOVED***';
+      const azureKey = import.meta.env.VITE_AZURE_OPENAI_KEY;
+      const azureEndpoint = import.meta.env.VITE_AZURE_OPENAI_ENDPOINT;
       const azureEmbeddingDeployment = import.meta.env.VITE_AZURE_EMBEDDING_DEPLOYMENT || 'text-embedding-3-large';
       const azureApiVersion = import.meta.env.VITE_AZURE_API_VERSION || '2024-05-01-preview';
 
