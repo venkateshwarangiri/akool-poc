@@ -59,3 +59,4 @@ jobs:
           action: "upload"
           app_location: "/"       # root of your project
           output_location: "dist" # vite build output
+          skip_app_build: true    # we already built the app
