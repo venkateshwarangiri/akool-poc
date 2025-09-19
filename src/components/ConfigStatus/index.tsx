@@ -9,6 +9,17 @@ export const ConfigStatus: React.FC<ConfigStatusProps> = ({ onRetry }) => {
   const hasAzureEndpoint = !!import.meta.env.VITE_AZURE_OPENAI_ENDPOINT;
   const isConfigured = hasAzureKey && hasAzureEndpoint;
 
+  // Debug logging
+  console.log('ConfigStatus Debug:', {
+    hasAzureKey,
+    hasAzureEndpoint,
+    isConfigured,
+    keyValue: import.meta.env.VITE_AZURE_OPENAI_KEY,
+    endpointValue: import.meta.env.VITE_AZURE_OPENAI_ENDPOINT,
+    mode: import.meta.env.MODE,
+    prod: import.meta.env.PROD
+  });
+
   if (isConfigured) {
     return null; // Don't show anything if properly configured
   }
