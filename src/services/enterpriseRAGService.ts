@@ -298,52 +298,35 @@ export class EnterpriseRAGService {
       const azureEmbeddingDeployment = import.meta.env.VITE_AZURE_EMBEDDING_DEPLOYMENT || 'text-embedding-3-large';
       const azureApiVersion = import.meta.env.VITE_AZURE_API_VERSION || '2024-05-01-preview';
 
-      if (azureKey && azureEndpoint) {
-        // Use Azure OpenAI embeddings
-        // Ensure endpoint doesn't end with slash to avoid double slashes
-        const baseEndpoint = azureEndpoint.endsWith('/') ? azureEndpoint.slice(0, -1) : azureEndpoint;
-        
-        const response = await fetch(
-          `${baseEndpoint}/openai/deployments/${azureEmbeddingDeployment}/embeddings?api-version=${azureApiVersion}`,
-          {
-            method: 'POST',
-            headers: {
-              'api-key': azureKey,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              input: text
-            })
-          }
-        );
+      const isProd = import.meta.env.PROD;
 
+      if (azureKey && azureEndpoint && !isProd) {
+        const endpoint = azureEndpoint.endsWith('/') ? azureEndpoint.slice(0, -1) : azureEndpoint;
+        const response = await fetch(`${endpoint}/openai/deployments/${azureEmbeddingDeployment}/embeddings?api-version=${azureApiVersion}`, {
+          method: 'POST',
+          headers: {
+            'api-key': azureKey,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ input: text }),
+        });
         if (!response.ok) {
           throw new Error(`Azure OpenAI Embedding API error: ${response.status}`);
         }
-
-        const data = await response.json();
-        return data.data[0].embedding;
+        return (await response.json()).data[0].embedding;
       } else {
-        // Fallback to direct OpenAI
-        const config = this.llmService.getConfig();
-        const response = await fetch('https://api.openai.com/v1/embeddings', {
+        // In production, use API proxy
+        const response = await fetch('/api/embeddings', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${config.apiKey}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            input: text,
-            model: 'text-embedding-ada-002'
-          })
+          body: JSON.stringify({ input: text }),
         });
-
         if (!response.ok) {
-          throw new Error(`OpenAI Embedding API error: ${response.status}`);
+          throw new Error(`Embedding API proxy error: ${response.status}`);
         }
-
-        const data = await response.json();
-        return data.data[0].embedding;
+        return (await response.json()).data[0].embedding;
       }
     } catch (error) {
       console.warn('Failed to generate embedding, using fallback:', error);

@@ -169,13 +169,14 @@ export class LLMService {
         requestBody: requestBody
       });
 
-      // Ensure endpoint is treated as absolute URL
-      const endpoint = this.config.endpoint.startsWith('http') 
-        ? this.config.endpoint 
-        : `https://${this.config.endpoint}`;
-        
+      // Ensure endpoint is absolute or use API proxy in production
+      const isProd = import.meta.env.PROD;
+      const endpoint = isProd
+        ? '/api/chat'
+        : (this.config.endpoint.startsWith('http') ? this.config.endpoint : `https://${this.config.endpoint}`);
+
       console.log('🔧 Making request to:', endpoint);
-        
+      
       const response = await fetch(endpoint, {
         method: 'POST',
         headers,

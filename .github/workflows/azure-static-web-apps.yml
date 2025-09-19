@@ -38,6 +38,7 @@ jobs:
           action: "upload"
           app_location: "/"       # root of your project
           output_location: "dist" # vite build output
+          api_location: "api"     # Azure Functions API for proxying Azure OpenAI
           skip_app_build: false   # let Azure build the app
           app_build_command: "npm install && npm run build"
           api_build_command: ""
