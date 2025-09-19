@@ -61,13 +61,51 @@ function App() {
   // Official Akool LLM integration (disabled for production)
   // const { setClient: setOfficialClient } = useOfficialAkoolLLM();
 
-  // Connect LLM config to enterprise RAG service
+  // Auto-initialize LLM service with Azure config
+  useEffect(() => {
+    const initializeLLMService = async () => {
+      try {
+        // Import the createAzureOpenAIService function
+        const { createAzureOpenAIService } = await import('./services/llmService');
+        
+        // Create LLM service with Azure config
+        const llmService = createAzureOpenAIService();
+        
+        // Test connection
+        const isConnected = await llmService.testConnection();
+        
+        if (isConnected) {
+          console.log('✅ Azure OpenAI LLM service connected successfully');
+          
+          // Enable RAG with the connected LLM service
+          enableRAG({
+            endpoint: llmService.getConfig().endpoint,
+            apiKey: llmService.getConfig().apiKey,
+            model: llmService.getConfig().model,
+            maxTokens: llmService.getConfig().maxTokens,
+            temperature: llmService.getConfig().temperature,
+          });
+        } else {
+          console.error('❌ Failed to connect to Azure OpenAI LLM service');
+        }
+      } catch (error) {
+        console.error('❌ Failed to initialize Azure OpenAI LLM service:', error);
+      }
+    };
+
+    // Only initialize if RAG is not already enabled
+    if (!ragState.isEnabled) {
+      initializeLLMService();
+    }
+  }, [ragState.isEnabled, enableRAG]);
+
+  // Connect LLM config to enterprise RAG service (fallback for manual config)
   useEffect(() => {
     if (llmConfig && llmConfig.endpoint && llmConfig.apiKey && !ragState.isEnabled) {
       console.log('LLM config updated, connecting to enterprise RAG service');
       enableRAG(llmConfig);
     }
-  }, [llmConfig, ragState.isEnabled]);
+  }, [llmConfig, ragState.isEnabled, enableRAG]);
 
   // Connect RTC client to official Akool LLM service (disabled for production)
   // useEffect(() => {
