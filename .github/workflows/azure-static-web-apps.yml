@@ -35,6 +35,12 @@ jobs:
 
       - name: Build project
         run: pnpm build
+        env:
+          VITE_AZURE_OPENAI_KEY: ${{ secrets.VITE_AZURE_OPENAI_KEY }}
+          VITE_AZURE_OPENAI_ENDPOINT: ${{ secrets.VITE_AZURE_OPENAI_ENDPOINT }}
+          VITE_AZURE_GPT4O_DEPLOYMENT: ${{ secrets.VITE_AZURE_GPT4O_DEPLOYMENT }}
+          VITE_AZURE_EMBEDDING_DEPLOYMENT: ${{ secrets.VITE_AZURE_EMBEDDING_DEPLOYMENT }}
+          VITE_AZURE_API_VERSION: ${{ secrets.VITE_AZURE_API_VERSION }}
 
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
