@@ -667,6 +667,11 @@ export class EnterpriseRAGService {
     return this.llmService;
   }
 
+  // Return all documents as an array for UI consumption
+  public getDocuments(): EnterpriseDocument[] {
+    return Array.from(this.documents.values());
+  }
+
   private createEnhancedPrompt(query: string, context: string): string {
     return `You are an expert assistant. Answer SHORT and SWEET (2-3 sentences max).
 Use only the provided context. If unsure, say you don’t know.
