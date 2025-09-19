@@ -6,7 +6,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   return defineConfig({
     plugins: [react()],
-    base: env.VITE_SERVER_BASE,
+    base: mode === 'production' ? './' : env.VITE_SERVER_BASE,
     server: {
       host: '0.0.0.0',
     },
