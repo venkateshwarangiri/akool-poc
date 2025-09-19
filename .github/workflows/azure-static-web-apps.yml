@@ -28,7 +28,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
+          cache: 'npm'
 
       - name: Debug environment variables
         run: |
@@ -48,7 +48,7 @@ jobs:
           app_location: "/"       # root of your project
           output_location: "dist" # vite build output
           skip_app_build: false   # let Azure build with our env vars
-          app_build_command: "pnpm install --frozen-lockfile && pnpm build"
+          app_build_command: "npm install && npm run build"
           api_build_command: ""
         env:
           VITE_AZURE_OPENAI_KEY: ${{ secrets.VITE_AZURE_OPENAI_KEY }}
