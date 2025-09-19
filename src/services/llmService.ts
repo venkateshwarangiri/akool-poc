@@ -306,17 +306,16 @@ export async function createLLMServiceWithRetry(
   return service;
 }
 
+import { getAzureConfig } from '../config/azureConfig';
+
 // Utility function to create Azure OpenAI service from environment variables
 export function createAzureOpenAIService(): LLMService {
-  const apiKey = import.meta.env.VITE_AZURE_OPENAI_KEY;
-  const endpoint = import.meta.env.VITE_AZURE_OPENAI_ENDPOINT;
-  const deployment = import.meta.env.VITE_AZURE_GPT4O_DEPLOYMENT || 'gpt-4o';
-  const apiVersion = import.meta.env.VITE_AZURE_API_VERSION || '2024-05-01-preview';
-
-  if (!apiKey || !endpoint) {
-    throw new Error('Azure OpenAI credentials not configured. Please set VITE_AZURE_OPENAI_KEY and VITE_AZURE_OPENAI_ENDPOINT environment variables.');
+  const config = getAzureConfig();
+  
+  if (!config.apiKey || !config.endpoint || config.apiKey === 'YOUR_AZURE_OPENAI_KEY_HERE') {
+    throw new Error('Azure OpenAI credentials not configured. Please set VITE_AZURE_OPENAI_KEY and VITE_AZURE_OPENAI_ENDPOINT environment variables or update the config file.');
   }
 
-  const config = LLMConfigs.azureOpenAI(apiKey, endpoint, deployment, apiVersion);
-  return new LLMService(config);
+  const llmConfig = LLMConfigs.azureOpenAI(config.apiKey, config.endpoint, config.gpt4oDeployment, config.apiVersion);
+  return new LLMService(llmConfig);
 }

@@ -1,12 +1,14 @@
 import React from 'react';
+import { getAzureConfig } from '../../config/azureConfig';
 
 interface ConfigStatusProps {
   onRetry?: () => void;
 }
 
 export const ConfigStatus: React.FC<ConfigStatusProps> = ({ onRetry }) => {
-  const hasAzureKey = !!import.meta.env.VITE_AZURE_OPENAI_KEY;
-  const hasAzureEndpoint = !!import.meta.env.VITE_AZURE_OPENAI_ENDPOINT;
+  const config = getAzureConfig();
+  const hasAzureKey = !!config.apiKey && config.apiKey !== 'YOUR_AZURE_OPENAI_KEY_HERE';
+  const hasAzureEndpoint = !!config.endpoint && config.endpoint !== 'https://your-resource.openai.azure.com/';
   const isConfigured = hasAzureKey && hasAzureEndpoint;
 
   // Debug logging
