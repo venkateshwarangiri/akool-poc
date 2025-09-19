@@ -30,9 +30,6 @@ jobs:
           node-version: '20'
           cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
       - name: Debug environment variables
         run: |
           echo "Checking GitHub Secrets availability:"
@@ -42,15 +39,6 @@ jobs:
           echo "VITE_AZURE_EMBEDDING_DEPLOYMENT: ${{ secrets.VITE_AZURE_EMBEDDING_DEPLOYMENT != '' && 'SET' || 'NOT SET' }}"
           echo "VITE_AZURE_API_VERSION: ${{ secrets.VITE_AZURE_API_VERSION != '' && 'SET' || 'NOT SET' }}"
 
-      - name: Build project
-        run: pnpm build
-        env:
-          VITE_AZURE_OPENAI_KEY: ${{ secrets.VITE_AZURE_OPENAI_KEY }}
-          VITE_AZURE_OPENAI_ENDPOINT: ${{ secrets.VITE_AZURE_OPENAI_ENDPOINT }}
-          VITE_AZURE_GPT4O_DEPLOYMENT: ${{ secrets.VITE_AZURE_GPT4O_DEPLOYMENT }}
-          VITE_AZURE_EMBEDDING_DEPLOYMENT: ${{ secrets.VITE_AZURE_EMBEDDING_DEPLOYMENT }}
-          VITE_AZURE_API_VERSION: ${{ secrets.VITE_AZURE_API_VERSION }}
-
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
@@ -59,6 +47,12 @@ jobs:
           action: "upload"
           app_location: "/"       # root of your project
           output_location: "dist" # vite build output
-          skip_app_build: true    # we already built the app
-          app_build_command: "pnpm build"
+          skip_app_build: false   # let Azure build with our env vars
+          app_build_command: "pnpm install --frozen-lockfile && pnpm build"
           api_build_command: ""
+        env:
+          VITE_AZURE_OPENAI_KEY: ${{ secrets.VITE_AZURE_OPENAI_KEY }}
+          VITE_AZURE_OPENAI_ENDPOINT: ${{ secrets.VITE_AZURE_OPENAI_ENDPOINT }}
+          VITE_AZURE_GPT4O_DEPLOYMENT: ${{ secrets.VITE_AZURE_GPT4O_DEPLOYMENT }}
+          VITE_AZURE_EMBEDDING_DEPLOYMENT: ${{ secrets.VITE_AZURE_EMBEDDING_DEPLOYMENT }}
+          VITE_AZURE_API_VERSION: ${{ secrets.VITE_AZURE_API_VERSION }}
