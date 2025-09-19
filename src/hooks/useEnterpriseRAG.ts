@@ -1,8 +1,8 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { RTCClient } from '../agoraHelper';
 import { LLMService, LLMConfig } from '../services/llmService';
-import { enterpriseRAGService, RAGResponse, RAGConfig } from '../services/enterpriseRAGService';
-
+import { EnterpriseRAGService, RAGResponse, RAGConfig } from '../services/enterpriseRAGService';
+const enterpriseRAGService = new EnterpriseRAGService();
 export interface EnterpriseRAGState {
   isEnabled: boolean;
   isProcessing: boolean;

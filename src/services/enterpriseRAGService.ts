@@ -292,50 +292,27 @@ export class EnterpriseRAGService {
     }
 
     try {
-      // Check if we have Azure OpenAI configuration (same as ChromaRAGService)
-      const azureKey = import.meta.env.VITE_AZURE_OPENAI_KEY;
-      const azureEndpoint = import.meta.env.VITE_AZURE_OPENAI_ENDPOINT;
-      const azureEmbeddingDeployment = import.meta.env.VITE_AZURE_EMBEDDING_DEPLOYMENT || 'text-embedding-3-large';
-      const azureApiVersion = import.meta.env.VITE_AZURE_API_VERSION || '2024-05-01-preview';
-
-      const isProd = import.meta.env.PROD;
-
-      if (azureKey && azureEndpoint && !isProd) {
-        const endpoint = azureEndpoint.endsWith('/') ? azureEndpoint.slice(0, -1) : azureEndpoint;
-        const response = await fetch(`${endpoint}/openai/deployments/${azureEmbeddingDeployment}/embeddings?api-version=${azureApiVersion}`, {
-          method: 'POST',
-          headers: {
-            'api-key': azureKey,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ input: text }),
-        });
-        if (!response.ok) {
-          throw new Error(`Azure OpenAI Embedding API error: ${response.status}`);
-        }
-        return (await response.json()).data[0].embedding;
-      } else {
-        // In production, use API proxy (with optional azure override)
-        const response = await fetch('/api/embeddings', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ 
-            input: text,
-            azure: {
-              apiKey: import.meta.env.VITE_AZURE_OPENAI_KEY,
-              endpoint: import.meta.env.VITE_AZURE_OPENAI_ENDPOINT,
-              apiVersion: import.meta.env.VITE_AZURE_API_VERSION,
-              deployment: import.meta.env.VITE_AZURE_EMBEDDING_DEPLOYMENT
-            }
-          }),
-        });
-        if (!response.ok) {
-          throw new Error(`Embedding API proxy error: ${response.status}`);
-        }
-        return (await response.json()).data[0].embedding;
+      // Always use API proxy (with azure override from current LLM config)
+      const llmCfg = this.llmService?.getConfig() as any;
+      const response = await fetch('/api/embeddings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          input: text,
+          azure: {
+            apiKey: llmCfg?.apiKey,
+            endpoint: llmCfg?.endpoint,
+            apiVersion: llmCfg?.apiVersion ?? '2024-05-01-preview',
+            deployment: llmCfg?.embeddingDeployment ?? 'text-embedding-3-large'
+          }
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(`Embedding API proxy error: ${response.status}`);
       }
+      return (await response.json()).data[0].embedding;
     } catch (error) {
       console.warn('Failed to generate embedding, using fallback:', error);
       return this.generateSimpleEmbedding(text);
@@ -668,6 +645,28 @@ export class EnterpriseRAGService {
     return (avgSimilarity * 0.7 + sourceCount * 0.3);
   }
 
+  // Expose current config for hooks/components
+  public getConfig(): RAGConfig {
+    return this.config;
+  }
+
+  // Expose basic stats for UI/auto-enable logic
+  public getStats(): { documentCount: number; totalChunks: number } {
+    let totalChunks = 0;
+    for (const [, doc] of this.documents) {
+      totalChunks += doc.chunks.length;
+    }
+    return {
+      documentCount: this.documents.size,
+      totalChunks
+    };
+  }
+
+  // Allow hooks to verify LLM service availability
+  public getLLMService(): LLMService | null {
+    return this.llmService;
+  }
+
   private createEnhancedPrompt(query: string, context: string): string {
     return `You are an expert assistant. Answer SHORT and SWEET (2-3 sentences max).
 Use only the provided context. If unsure, say you don’t know.
@@ -882,3 +881,6 @@ ${context}`;
     return denominator === 0 ? 0 : dotProduct / denominator;
   }
 }
+
+// Singleton instance for backward-compatible imports
+export const enterpriseRAGService = new EnterpriseRAGService();

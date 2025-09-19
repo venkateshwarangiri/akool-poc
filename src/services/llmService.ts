@@ -169,18 +169,17 @@ export class LLMService {
         requestBody: requestBody
       });
 
-      // Ensure endpoint is absolute or use API proxy in production
-      const isProd = import.meta.env.PROD;
-      const endpoint = isProd ? '/api/chat' : (this.config.endpoint.startsWith('http') ? this.config.endpoint : `https://${this.config.endpoint}`);
+      // Always use API proxy to avoid CORS and keep secrets off the client
+      const endpoint = '/api/chat';
 
-      const azureOverride = isProd ? {
+      const azureOverride = {
         azure: {
-          apiKey: import.meta.env.VITE_AZURE_OPENAI_KEY,
-          endpoint: import.meta.env.VITE_AZURE_OPENAI_ENDPOINT,
-          apiVersion: import.meta.env.VITE_AZURE_API_VERSION,
-          deployment: import.meta.env.VITE_AZURE_GPT4O_DEPLOYMENT
+          apiKey: this.config.apiKey,
+          endpoint: this.config.endpoint,
+          apiVersion: (this.config as any).apiVersion ?? '2024-05-01-preview',
+          deployment: this.config.model ?? 'gpt-4o'
         }
-      } : {};
+      };
 
       console.log('🔧 Making request to:', endpoint);
       

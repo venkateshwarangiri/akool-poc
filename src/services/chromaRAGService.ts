@@ -600,47 +600,27 @@ export class ChromaRAGService {
     }
 
     try {
-      // Check if we have Azure OpenAI configuration
-      const azureKey = import.meta.env.VITE_AZURE_OPENAI_KEY;
-      const azureEndpoint = import.meta.env.VITE_AZURE_OPENAI_ENDPOINT;
-      const azureEmbeddingDeployment = import.meta.env.VITE_AZURE_EMBEDDING_DEPLOYMENT || 'text-embedding-3-large';
-      const azureApiVersion = import.meta.env.VITE_AZURE_API_VERSION || '2024-05-01-preview';
-      const isProd = import.meta.env.PROD;
-
-      if (azureKey && azureEndpoint && !isProd) {
-        const endpoint = azureEndpoint.endsWith('/') ? azureEndpoint.slice(0, -1) : azureEndpoint;
-        const response = await fetch(`${endpoint}/openai/deployments/${azureEmbeddingDeployment}/embeddings?api-version=${azureApiVersion}`, {
-          method: 'POST',
-          headers: {
-            'api-key': azureKey,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ input: text }),
-        });
-        if (!response.ok) {
-          throw new Error(`Azure OpenAI Embedding API error: ${response.status}`);
-        }
-        return (await response.json()).data[0].embedding;
-      } else {
+      // Generate embeddings using API proxy in production and local
+      try {
+        const llmCfg = this.llmService?.getConfig() as any;
         const response = await fetch('/api/embeddings', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ 
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
             input: text,
             azure: {
-              apiKey: import.meta.env.VITE_AZURE_OPENAI_KEY,
-              endpoint: import.meta.env.VITE_AZURE_OPENAI_ENDPOINT,
-              apiVersion: import.meta.env.VITE_AZURE_API_VERSION,
-              deployment: import.meta.env.VITE_AZURE_EMBEDDING_DEPLOYMENT
+              apiKey: llmCfg?.apiKey,
+              endpoint: llmCfg?.endpoint,
+              apiVersion: llmCfg?.apiVersion ?? '2024-05-01-preview',
+              deployment: llmCfg?.embeddingDeployment ?? 'text-embedding-3-large'
             }
-          }),
+          })
         });
-        if (!response.ok) {
-          throw new Error(`Embedding API proxy error: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`Embedding API proxy error: ${response.status}`);
         return (await response.json()).data[0].embedding;
+      } catch (error) {
+        console.error('Failed to generate embedding via API proxy:', error);
+        throw error;
       }
     } catch (error) {
       console.warn('Failed to generate embedding, using fallback:', error);
