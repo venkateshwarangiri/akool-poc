@@ -21,18 +21,15 @@ export function getConfigValue(envVar: string, fallback: string): string {
   return import.meta.env[envVar] || fallback;
 }
 
-// Try to import local config if it exists
-let LOCAL_CONFIG: any = null;
-try {
-  LOCAL_CONFIG = require('./azureConfig.local').AZURE_CONFIG_LOCAL;
-} catch (e) {
-  // Local config doesn't exist, use default
-}
+// Import local config directly (will be undefined if file doesn't exist)
+import { AZURE_CONFIG_LOCAL } from './azureConfig.local';
 
 // Get Azure OpenAI configuration
 export function getAzureConfig() {
-  // Use local config if available, otherwise use environment variables or default config
-  const config = LOCAL_CONFIG || AZURE_CONFIG;
+  // Use local config if available, otherwise use default config
+  const config = AZURE_CONFIG_LOCAL || AZURE_CONFIG;
+  
+  console.log('Using config:', config === AZURE_CONFIG_LOCAL ? 'LOCAL' : 'DEFAULT');
   
   return {
     apiKey: getConfigValue('VITE_AZURE_OPENAI_KEY', config.apiKey),

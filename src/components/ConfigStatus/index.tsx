@@ -16,6 +16,8 @@ export const ConfigStatus: React.FC<ConfigStatusProps> = ({ onRetry }) => {
     hasAzureKey,
     hasAzureEndpoint,
     isConfigured,
+    configApiKey: config.apiKey,
+    configEndpoint: config.endpoint,
     keyValue: import.meta.env.VITE_AZURE_OPENAI_KEY,
     endpointValue: import.meta.env.VITE_AZURE_OPENAI_ENDPOINT,
     mode: import.meta.env.MODE,
