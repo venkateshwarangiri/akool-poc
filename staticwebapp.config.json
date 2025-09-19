@@ -1,6 +1,12 @@
 {
   "routes": [
     {
+      "route": "/assets/*",
+      "headers": {
+        "Content-Type": "application/javascript"
+      }
+    },
+    {
       "route": "/*",
       "serve": "/index.html",
       "statusCode": 200
@@ -27,5 +33,8 @@
     ".jpeg": "image/jpeg",
     ".gif": "image/gif",
     ".ico": "image/x-icon"
+  },
+  "globalHeaders": {
+    "X-Content-Type-Options": "nosniff"
   }
 }

@@ -11,10 +11,11 @@ export default defineConfig(({ mode }) => {
       host: '0.0.0.0',
     },
     build: {
+      // Disable ES modules to avoid MIME type issues on Azure Static Web Apps
+      target: 'es2015',
       rollupOptions: {
         output: {
-          // Ensure proper module format for Azure Static Web Apps
-          format: 'es',
+          format: 'iife',
           entryFileNames: 'assets/[name]-[hash].js',
           chunkFileNames: 'assets/[name]-[hash].js',
           assetFileNames: 'assets/[name]-[hash].[ext]'
