@@ -10,5 +10,16 @@ export default defineConfig(({ mode }) => {
     server: {
       host: '0.0.0.0',
     },
+    build: {
+      rollupOptions: {
+        output: {
+          // Ensure proper module format for Azure Static Web Apps
+          format: 'es',
+          entryFileNames: 'assets/[name]-[hash].js',
+          chunkFileNames: 'assets/[name]-[hash].js',
+          assetFileNames: 'assets/[name]-[hash].[ext]'
+        }
+      }
+    }
   });
 });

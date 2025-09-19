@@ -13,7 +13,9 @@
   "mimeTypes": {
     ".json": "application/json",
     ".js": "application/javascript",
+    ".mjs": "application/javascript",
     ".css": "text/css",
-    ".html": "text/html"
+    ".html": "text/html",
+    ".wasm": "application/wasm"
   }
 }
